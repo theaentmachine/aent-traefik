@@ -1,7 +1,7 @@
 {
   "name": "theaentmachine/aent-traefik",
   "homepage" : "https://github.com/theaentmachine/aent-traefik",
-  "description": "An aent to install a PHP container",
+  "description": "An aent that installs and manages Traefik",
   "type" : "aent",
   "license" : "MIT",
   "authors" : [{

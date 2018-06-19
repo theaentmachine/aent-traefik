@@ -15,12 +15,7 @@ ENV SHELL "/bin/sh"
 # Installs missing libraries.
 RUN apk add --no-cache --update \
     wget \
-    tar \
-    python \
-    python-dev \
-    py-pip \
-    build-base &&\
-    pip install ruamel.yaml
+    tar
 
 # Installs Docker client.
 ENV DOCKER_VERSION "18.03.1-ce"

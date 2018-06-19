@@ -5,6 +5,7 @@ namespace TheAentMachine\AentTraefik\Command;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
 use TheAentMachine\AentTraefik\EventEnum;
+use TheAentMachine\CommonEvents;
 use TheAentMachine\EventCommand;
 use TheAentMachine\Hercule;
 use TheAentMachine\Hermes;
@@ -15,7 +16,7 @@ class AddEventCommand extends EventCommand
 {
     protected function getEventName(): string
     {
-        return EventEnum::ADD;
+        return 'ADD';
     }
 
     protected function executeEvent(?string $payload): void
@@ -24,9 +25,10 @@ class AddEventCommand extends EventCommand
 
         $service = new Service();
 
-        $this->output->writeln("<info>Installing traefik reverse proxy</info>");
+        $this->log->notice("Installing traefik reverse proxy");
 
         $service->setServiceName('traefik');
+        $service->setImage('traefik:1.6');
         $service->addPort(80, 80);
 
 
@@ -43,8 +45,7 @@ class AddEventCommand extends EventCommand
             $service->addPort(443, 443);
         }
 
-        Hercule::setHandledEvents(EventEnum::getHandledEvents());
-
-        Hermes::dispatchJson(EventEnum::NEW_DOCKER_SERVICE_INFO, $service);
+        $commonEvents = new CommonEvents();
+        $commonEvents->dispatchService($service, $helper, $this->input, $this->output);
     }
 }

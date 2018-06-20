@@ -30,7 +30,7 @@ class NewVirtualHostEventCommand extends JsonEventCommand
         $service = new Service();
 
         if ($virtualHost === null) {
-            $this->output->writeln('You are about to <info>configure the domain name</info> of this service in the reverse proxy (Traefik).');
+            $this->output->writeln("You are about to <info>configure the domain name</info> of the service <info>$serviceName</info> in the reverse proxy (Traefik).");
             $question = new Question('What is the domain name of this service? : ', '');
             $question->setValidator(function (string $value) {
                 $value = trim($value);

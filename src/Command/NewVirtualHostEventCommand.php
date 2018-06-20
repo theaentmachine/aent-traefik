@@ -47,6 +47,7 @@ class NewVirtualHostEventCommand extends JsonEventCommand
         $this->output->writeln("<info>Adding host redirection from '$virtualHost' to service '$serviceName' on port '$virtualPort'</info>");
 
         $service->setServiceName($serviceName);
+        $service->addLabel('traefik.enable', 'true');
         $service->addLabel('traefik.backend', $serviceName);
         $service->addLabel('traefik.frontend.rule', 'Host:'.$virtualHost);
         $service->addLabel('traefik.port', (string) $virtualPort);

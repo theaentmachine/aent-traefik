@@ -30,10 +30,43 @@ class AddEventCommand extends EventCommand
         $service->setServiceName('traefik');
         $service->setImage('traefik:1.6');
         $service->addPort(80, 80);
+        // Use default docker parameters
+        $service->addCommand('--docker');
+        // Do not expose services by default (otherwise it's insecure!)
+        $service->addCommand('--docker.exposedbydefault=false');
 
+        $service->addBindVolume('/var/run/docker.sock', '/var/run/docker.sock');
 
-        /************************ PHP Version **********************/
-        $https = false;
+        $question = new ChoiceQuestion(
+            "Do you want to enable Traefik UI? (useful in development environments) [No] ",
+            array('Yes', 'No'),
+            1
+        );
+        $answer = $helper->ask($this->input, $this->output, $question);
+        if ($answer === 'Yes') {
+            // Let's enable the UI
+            $service->addCommand('--api');
+
+            $question = new Question('What will be the domain name of Traefik? : ', '');
+            $question->setValidator(function (string $value) {
+                $value = trim($value);
+                if (!\preg_match('/^(?!:\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-_]+\.[a-zA-Z]{2,11}?$/im', $value)) {
+                    throw new \InvalidArgumentException('Invalid domain name "'.$value.'". Note: the domain name must not start with "http(s)://"');
+                }
+
+                return $value;
+            });
+
+            $url = $helper->ask($this->input, $this->output, $question);
+
+            $service->addLabel('traefik.enable', 'true');
+            $service->addLabel('traefik.backend', 'traefik');
+            $service->addLabel('traefik.frontend.rule', 'Host:'.$url);
+            $service->addLabel('traefik.port', '8080');
+        }
+
+        /************************ HTTPS **********************/
+        /*$https = false;
         $question = new ChoiceQuestion(
             "Do you want to add HTTPS support using Let's encrypt? [No] ",
             array('Yes', 'No'),
@@ -43,7 +76,7 @@ class AddEventCommand extends EventCommand
         if ($answer === 'Yes') {
             $https = true;
             $service->addPort(443, 443);
-        }
+        }*/
 
         $commonEvents = new CommonEvents();
         $commonEvents->dispatchService($service, $helper, $this->input, $this->output);

@@ -20,7 +20,7 @@ class NewVirtualHostEventCommand extends JsonEventCommand
         return 'NEW_VIRTUAL_HOST';
     }
 
-    protected function executeJsonEvent(array $payload): void
+    protected function executeJsonEvent(array $payload): ?array
     {
         $serviceName = $payload['service'];
         $virtualHost = $payload['virtualHost'] ?? null;
@@ -54,5 +54,9 @@ class NewVirtualHostEventCommand extends JsonEventCommand
 
         $commonEvents = new CommonEvents();
         $commonEvents->dispatchService($service, $helper, $this->input, $this->output);
+
+        return [
+            'virtualHost' => $virtualHost
+        ];
     }
 }

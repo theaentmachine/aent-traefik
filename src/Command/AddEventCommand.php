@@ -19,7 +19,7 @@ class AddEventCommand extends EventCommand
         return 'ADD';
     }
 
-    protected function executeEvent(?string $payload): void
+    protected function executeEvent(?string $payload): ?string
     {
         $helper = $this->getHelper('question');
 
@@ -80,5 +80,7 @@ class AddEventCommand extends EventCommand
 
         $commonEvents = new CommonEvents();
         $commonEvents->dispatchService($service, $helper, $this->input, $this->output);
+
+        return null;
     }
 }

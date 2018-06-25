@@ -37,27 +37,28 @@ class AddEventCommand extends EventCommand
 
         $service->addBindVolume('/var/run/docker.sock', '/var/run/docker.sock');
 
-        $question = new ChoiceQuestion(
-            "Do you want to enable Traefik UI? (useful in development environments) [No] ",
-            array('Yes', 'No'),
-            1
-        );
-        $answer = $helper->ask($this->input, $this->output, $question);
-        if ($answer === 'Yes') {
+        $answer = $this->getAentHelper()->question('Do you want to enable Traefik UI?')
+            ->yesNoQuestion()
+            ->setDefault('y')
+            ->setHelpText('The Traefik UI can be useful in development environments.')
+            ->ask();
+
+        if ($answer) {
             // Let's enable the UI
             $service->addCommand('--api');
 
-            $question = new Question('What will be the domain name of Traefik? : ', '');
-            $question->setValidator(function (string $value) {
-                $value = trim($value);
-                if (!\preg_match('/^(?!:\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-_]+\.[a-zA-Z]{2,11}?$/im', $value)) {
-                    throw new \InvalidArgumentException('Invalid domain name "'.$value.'". Note: the domain name must not start with "http(s)://"');
-                }
+            $url = $this->getAentHelper()->question('Traefik UI domain name')
+                ->setHelpText('This is the domain name you will use to access the Traefik UI.')
+                ->compulsory()
+                ->setValidator(function (string $value) {
+                    $value = trim($value);
+                    if (!\preg_match('/^(?!:\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-_]+\.[a-zA-Z]{2,11}?$/im', $value)) {
+                        throw new \InvalidArgumentException('Invalid domain name "'.$value.'". Note: the domain name must not start with "http(s)://"');
+                    }
 
-                return $value;
-            });
-
-            $url = $helper->ask($this->input, $this->output, $question);
+                    return $value;
+                })
+                ->ask();
 
             $service->addLabel('traefik.enable', 'true');
             $service->addLabel('traefik.backend', 'traefik');

@@ -1,0 +1,20 @@
+{
+	"aents": [
+		{
+			"image": "theaentmachine/aent-docker-compose",
+			"handled_events": [
+				"ADD",
+				"REMOVE",
+				"NEW_DOCKER_SERVICE_INFO",
+				"DELETE_DOCKER_SERVICE"
+			]
+		},
+		{
+			"image": "theaentmachine/aent-traefik",
+			"handled_events": [
+				"ADD",
+				"NEW_VIRTUAL_HOST"
+			]
+		}
+	]
+}

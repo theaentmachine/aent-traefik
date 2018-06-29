@@ -2,14 +2,8 @@
 
 namespace TheAentMachine\AentTraefik\Command;
 
-use Symfony\Component\Console\Question\ChoiceQuestion;
-use Symfony\Component\Console\Question\Question;
-use TheAentMachine\AentTraefik\EventEnum;
 use TheAentMachine\CommonEvents;
 use TheAentMachine\EventCommand;
-use TheAentMachine\Hercule;
-use TheAentMachine\Hermes;
-use TheAentMachine\Pheromone;
 use TheAentMachine\Service\Service;
 
 class AddEventCommand extends EventCommand
@@ -19,10 +13,11 @@ class AddEventCommand extends EventCommand
         return 'ADD';
     }
 
+    /**
+     * @throws \TheAentMachine\Exception\CannotHandleEventException
+     */
     protected function executeEvent(?string $payload): ?string
     {
-        $helper = $this->getHelper('question');
-
         $service = new Service();
 
         $this->log->notice("Installing traefik reverse proxy");
@@ -53,7 +48,7 @@ class AddEventCommand extends EventCommand
                 ->setValidator(function (string $value) {
                     $value = trim($value);
                     if (!\preg_match('/^(?!:\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-_]+\.[a-zA-Z]{2,11}?$/im', $value)) {
-                        throw new \InvalidArgumentException('Invalid domain name "'.$value.'". Note: the domain name must not start with "http(s)://"');
+                        throw new \InvalidArgumentException('Invalid domain name "' . $value . '". Note: the domain name must not start with "http(s)://"');
                     }
 
                     return $value;
@@ -62,7 +57,7 @@ class AddEventCommand extends EventCommand
 
             $service->addLabel('traefik.enable', 'true');
             $service->addLabel('traefik.backend', 'traefik');
-            $service->addLabel('traefik.frontend.rule', 'Host:'.$url);
+            $service->addLabel('traefik.frontend.rule', 'Host:' . $url);
             $service->addLabel('traefik.port', '8080');
         }
 
@@ -79,8 +74,8 @@ class AddEventCommand extends EventCommand
             $service->addPort(443, 443);
         }*/
 
-        $commonEvents = new CommonEvents();
-        $commonEvents->dispatchService($service, $helper, $this->input, $this->output);
+        $commonEvents = new CommonEvents($this->getAentHelper(), $this->output);
+        $commonEvents->dispatchService($service);
 
         return null;
     }

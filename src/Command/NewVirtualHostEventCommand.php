@@ -2,8 +2,7 @@
 
 namespace TheAentMachine\AentTraefik\Command;
 
-use TheAentMachine\CommonEvents;
-use TheAentMachine\JsonEventCommand;
+use TheAentMachine\Command\JsonEventCommand;
 use TheAentMachine\Service\Service;
 
 class NewVirtualHostEventCommand extends JsonEventCommand
@@ -13,9 +12,6 @@ class NewVirtualHostEventCommand extends JsonEventCommand
         return 'NEW_VIRTUAL_HOST';
     }
 
-    /**
-     * @throws \TheAentMachine\Exception\CannotHandleEventException
-     */
     protected function executeJsonEvent(array $payload): ?array
     {
         $serviceName = $payload['service'];
@@ -48,11 +44,9 @@ class NewVirtualHostEventCommand extends JsonEventCommand
         $service->addLabel('traefik.frontend.rule', 'Host:' . $virtualHost);
         $service->addLabel('traefik.port', (string)$virtualPort);
 
-        $commonEvents = new CommonEvents($this->getAentHelper(), $this->output);
-        $commonEvents->dispatchService($service);
+        // $commonEvents = new CommonEvents($this->getAentHelper(), $this->output);
+        // $commonEvents->dispatchService($service);
 
-        return [
-            'virtualHost' => $virtualHost
-        ];
+        return $service->jsonSerialize();
     }
 }

@@ -78,7 +78,8 @@ class AddEventCommand extends JsonEventCommand
         }
         if ($doAddHttps) {
             $service->addPort(443, 443);
-            $this->output->writeln('HTTPS has been enabled');
+            $this->output->writeln('<info>HTTPS has been enabled</info>');
+            $this->getAentHelper()->spacer();
         }
 
         // $commonEvents = new CommonEvents($this->getAentHelper(), $this->output);

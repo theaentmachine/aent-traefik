@@ -2,11 +2,12 @@
 
 namespace TheAentMachine\AentTraefik\Command;
 
-use TheAentMachine\CommonEvents;
-use TheAentMachine\EventCommand;
+use TheAentMachine\Aenthill\Manifest;
+use TheAentMachine\Aenthill\Metadata;
+use TheAentMachine\Command\JsonEventCommand;
 use TheAentMachine\Service\Service;
 
-class AddEventCommand extends EventCommand
+class AddEventCommand extends JsonEventCommand
 {
     protected function getEventName(): string
     {
@@ -14,13 +15,18 @@ class AddEventCommand extends EventCommand
     }
 
     /**
-     * @throws \TheAentMachine\Exception\CannotHandleEventException
+     * @param mixed[] $payload
+     * @return mixed[]|null
+     * @throws \TheAentMachine\Exception\ManifestException
+     * @throws \TheAentMachine\Exception\MissingEnvironmentVariableException
+     * @throws \TheAentMachine\Service\Exception\ServiceException
      */
-    protected function executeEvent(?string $payload): ?string
+    protected function executeJsonEvent(array $payload): ?array
     {
         $service = new Service();
+        $aentHelper = $this->getAentHelper();
 
-        $this->log->notice("Installing traefik reverse proxy");
+        $this->log->notice('Installing traefik reverse proxy');
 
         $service->setServiceName('traefik');
         $service->setImage('traefik:1.6');
@@ -32,7 +38,7 @@ class AddEventCommand extends EventCommand
 
         $service->addBindVolume('/var/run/docker.sock', '/var/run/docker.sock');
 
-        $answer = $this->getAentHelper()->question('Do you want to enable Traefik UI?')
+        $answer = $aentHelper->question('Do you want to enable Traefik UI?')
             ->yesNoQuestion()
             ->setDefault('y')
             ->setHelpText('The Traefik UI can be useful in development environments.')
@@ -42,7 +48,7 @@ class AddEventCommand extends EventCommand
             // Let's enable the UI
             $service->addCommand('--api');
 
-            $url = $this->getAentHelper()->question('Traefik UI domain name')
+            $url = $aentHelper->question('Traefik UI domain name')
                 ->setHelpText('This is the domain name you will use to access the Traefik UI.')
                 ->compulsory()
                 ->setValidator(function (string $value) {
@@ -62,21 +68,22 @@ class AddEventCommand extends EventCommand
         }
 
         /************************ HTTPS **********************/
-        /*$https = false;
-        $question = new ChoiceQuestion(
-            "Do you want to add HTTPS support using Let's encrypt? [No] ",
-            array('Yes', 'No'),
-            1
-        );
-        $answer = $helper->ask($this->input, $this->output, $question);
-        if ($answer === 'Yes') {
-            $https = true;
+        $envType = Manifest::getMetadata(Metadata::ENV_TYPE_KEY);
+        $doAddHttps = $envType === Metadata::ENV_TYPE_PROD;
+        if ($envType === Metadata::ENV_TYPE_TEST) {
+            $doAddHttps = $aentHelper->question('Do you want to add HTTPS support using Let\'s encrypt?')
+                ->yesNoQuestion()
+                ->setDefault('y')
+                ->ask();
+        }
+        if ($doAddHttps) {
             $service->addPort(443, 443);
-        }*/
+            $this->output->writeln('HTTPS has been enabled');
+        }
 
-        $commonEvents = new CommonEvents($this->getAentHelper(), $this->output);
-        $commonEvents->dispatchService($service);
+        // $commonEvents = new CommonEvents($this->getAentHelper(), $this->output);
+        // $commonEvents->dispatchService($service);
 
-        return null;
+        return $service->jsonSerialize();
     }
 }

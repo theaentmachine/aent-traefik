@@ -2,16 +2,23 @@
 
 namespace TheAentMachine\AentTraefik\Command;
 
-use TheAentMachine\Command\JsonEventCommand;
+use TheAentMachine\Aenthill\CommonEvents;
+use TheAentMachine\Command\AbstractJsonEventCommand;
+use TheAentMachine\Question\CommonValidators;
 use TheAentMachine\Service\Service;
 
-class NewVirtualHostEventCommand extends JsonEventCommand
+class NewVirtualHostEventCommand extends AbstractJsonEventCommand
 {
     protected function getEventName(): string
     {
-        return 'NEW_VIRTUAL_HOST';
+        return CommonEvents::NEW_VIRTUAL_HOST_EVENT;
     }
 
+    /**
+     * @param array $payload
+     * @return array|null
+     * @throws \TheAentMachine\Service\Exception\ServiceException
+     */
     protected function executeJsonEvent(array $payload): ?array
     {
         $serviceName = $payload['service'];
@@ -26,13 +33,7 @@ class NewVirtualHostEventCommand extends JsonEventCommand
             $virtualHost = $this->getAentHelper()->question('What is the domain name of this service?')
                 ->compulsory()
                 ->setDefault('')
-                ->setValidator(function (string $value) {
-                    $value = trim($value);
-                    if (!\preg_match('/^(?!:\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-_]+\.[a-zA-Z]{2,11}?$/im', $value)) {
-                        throw new \InvalidArgumentException('Invalid domain name "' . $value . '". Note: the domain name must not start with "http(s)://"');
-                    }
-                    return $value;
-                })
+                ->setValidator(CommonValidators::getDomainNameValidator())
                 ->ask();
         }
 
@@ -43,9 +44,6 @@ class NewVirtualHostEventCommand extends JsonEventCommand
         $service->addLabel('traefik.backend', $serviceName);
         $service->addLabel('traefik.frontend.rule', 'Host:' . $virtualHost);
         $service->addLabel('traefik.port', (string)$virtualPort);
-
-        // $commonEvents = new CommonEvents($this->getAentHelper(), $this->output);
-        // $commonEvents->dispatchService($service);
 
         return $service->jsonSerialize();
     }

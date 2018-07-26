@@ -3,11 +3,12 @@
 namespace TheAentMachine\AentTraefik\Command;
 
 use TheAentMachine\Aenthill\Manifest;
-use TheAentMachine\Aenthill\Metadata;
-use TheAentMachine\Command\JsonEventCommand;
+use TheAentMachine\Aenthill\CommonMetadata;
+use TheAentMachine\Command\AbstractJsonEventCommand;
+use TheAentMachine\Question\CommonValidators;
 use TheAentMachine\Service\Service;
 
-class AddEventCommand extends JsonEventCommand
+class AddEventCommand extends AbstractJsonEventCommand
 {
     protected function getEventName(): string
     {
@@ -18,7 +19,6 @@ class AddEventCommand extends JsonEventCommand
      * @param mixed[] $payload
      * @return mixed[]|null
      * @throws \TheAentMachine\Exception\ManifestException
-     * @throws \TheAentMachine\Exception\MissingEnvironmentVariableException
      * @throws \TheAentMachine\Service\Exception\ServiceException
      */
     protected function executeJsonEvent(array $payload): ?array
@@ -51,14 +51,7 @@ class AddEventCommand extends JsonEventCommand
             $url = $aentHelper->question('Traefik UI domain name')
                 ->setHelpText('This is the domain name you will use to access the Traefik UI.')
                 ->compulsory()
-                ->setValidator(function (string $value) {
-                    $value = trim($value);
-                    if (!\preg_match('/^(?!:\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-_]+\.[a-zA-Z]{2,11}?$/im', $value)) {
-                        throw new \InvalidArgumentException('Invalid domain name "' . $value . '". Note: the domain name must not start with "http(s)://"');
-                    }
-
-                    return $value;
-                })
+                ->setValidator(CommonValidators::getDomainNameValidator())
                 ->ask();
 
             $service->addLabel('traefik.enable', 'true');
@@ -68,9 +61,9 @@ class AddEventCommand extends JsonEventCommand
         }
 
         /************************ HTTPS **********************/
-        $envType = Manifest::getMetadata(Metadata::ENV_TYPE_KEY);
-        $doAddHttps = $envType === Metadata::ENV_TYPE_PROD;
-        if ($envType === Metadata::ENV_TYPE_TEST) {
+        $envType = Manifest::mustGetMetadata(CommonMetadata::ENV_TYPE_KEY);
+        $doAddHttps = $envType === CommonMetadata::ENV_TYPE_PROD;
+        if ($envType === CommonMetadata::ENV_TYPE_TEST) {
             $doAddHttps = $aentHelper->question('Do you want to add HTTPS support using Let\'s encrypt?')
                 ->yesNoQuestion()
                 ->setDefault('y')
@@ -81,9 +74,6 @@ class AddEventCommand extends JsonEventCommand
             $this->output->writeln('<info>HTTPS has been enabled</info>');
             $this->getAentHelper()->spacer();
         }
-
-        // $commonEvents = new CommonEvents($this->getAentHelper(), $this->output);
-        // $commonEvents->dispatchService($service);
 
         return $service->jsonSerialize();
     }

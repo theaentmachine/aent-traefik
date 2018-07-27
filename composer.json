@@ -9,11 +9,22 @@
       "name": "David Négrier",
       "email": "d.negrier@thecodingmachine.com",
       "homepage": "https://thecodingmachine.io"
+    },
+    {
+      "name" : "Jindun Shao",
+      "email" : "j.shao@thecodingmachine.com",
+      "homepage" : "https://github.com/JinTotonic"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "vcs",
+      "url":  "https://github.com/JinTotonic/aent-console"
     }
   ],
   "require": {
     "php": ">=7.1",
-    "theaentmachine/aent-console": "^1"
+    "theaentmachine/aent-console": "dev-jindun"
   },
   "require-dev": {
     "phpunit/phpunit": "^7",

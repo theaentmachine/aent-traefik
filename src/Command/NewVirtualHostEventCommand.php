@@ -32,7 +32,6 @@ class NewVirtualHostEventCommand extends AbstractJsonEventCommand
 
             $virtualHost = $this->getAentHelper()->question('What is the domain name of this service?')
                 ->compulsory()
-                ->setDefault('')
                 ->setValidator(CommonValidators::getDomainNameValidator())
                 ->ask();
         }

@@ -2,6 +2,7 @@
 
 namespace TheAentMachine\AentTraefik\Command;
 
+use TheAentMachine\Aenthill\CommonEvents;
 use TheAentMachine\Aenthill\Manifest;
 use TheAentMachine\Aenthill\CommonMetadata;
 use TheAentMachine\Command\AbstractJsonEventCommand;
@@ -12,7 +13,7 @@ class AddEventCommand extends AbstractJsonEventCommand
 {
     protected function getEventName(): string
     {
-        return 'ADD';
+        return CommonEvents::ADD_EVENT;
     }
 
     /**

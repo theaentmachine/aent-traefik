@@ -2,6 +2,7 @@
 
 namespace TheAentMachine\AentTraefik\Command;
 
+use TheAentMachine\Aenthill\Aenthill;
 use TheAentMachine\Aenthill\CommonEvents;
 use TheAentMachine\Aenthill\Manifest;
 use TheAentMachine\Aenthill\CommonMetadata;
@@ -38,6 +39,23 @@ class AddEventCommand extends AbstractJsonEventCommand
         $service->addCommand('--docker.exposedbydefault=false');
 
         $service->addBindVolume('/var/run/docker.sock', '/var/run/docker.sock');
+
+        $baseDomainName = $aentHelper->question('What is the base domain name of your environment?')
+            ->setDefault('.test.localhost')
+            ->setHelpText('By default, all virtualhosts will be created using the base domain name as a starting point.')
+            ->compulsory()
+            ->setValidator(function (string $value) {
+                $value = trim($value);
+                if (!\preg_match('/^\.(?!:\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-_]+\.[a-zA-Z]{2,11}?$/im', $value)) {
+                    throw new \InvalidArgumentException('Invalid value "' . $value .
+                        '". Hint: the base domain name must start with a dot (.). For instance: ".foobar.com" is a valid base domain name.'.
+                        "\nAdvice: on development environment, you should end your base domain name with \".localhost\". On Linux environment, \"*.localhost\" resolves to your host machine so you don't have to edit your /etc/hosts file for these domains (Linux only!).");
+                }
+                return $value;
+            })
+            ->ask();
+
+        Aenthill::update(['BASE_DOMAIN_NAME' => $baseDomainName]);
 
         $answer = $aentHelper->question('Do you want to enable Traefik UI?')
             ->yesNoQuestion()

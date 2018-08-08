@@ -2,6 +2,7 @@
 
 namespace TheAentMachine\AentTraefik\Command;
 
+use TheAentMachine\Aenthill\Aenthill;
 use TheAentMachine\Aenthill\CommonEvents;
 use TheAentMachine\Command\AbstractJsonEventCommand;
 use TheAentMachine\Exception\AenthillException;
@@ -33,20 +34,24 @@ class NewVirtualHostEventCommand extends AbstractJsonEventCommand
 
         $this->output->writeln("You are about to <info>configure the domain name</info> of the service <info>$serviceName</info> in the reverse proxy (Traefik).");
 
-        $service->setServiceName($serviceName);
         $service->addLabel('traefik.enable', 'true');
+
+        $baseDomainName = Aenthill::metadata('BASE_DOMAIN_NAME');
 
         foreach ($virtualHosts as $key => $virtualHost) {
             $virtualPort = (string) $virtualHost['port'];
             $comment = $virtualHost['comment'] ?? '';
 
-            if (!isset($virtualHost['host'])) {
+            if (isset($virtualHost['host'])) {
+                $virtualHost = $virtualHost['host'];
+            } elseif (isset($virtualHost['hostPrefix'])) {
+                $virtualHost = $virtualHost['hostPrefix'].$baseDomainName;
+            } else {
                 $virtualHost = $this->getAentHelper()->question('What is the domain name of this service?')
                     ->compulsory()
+                    ->setDefault($serviceName.$baseDomainName)
                     ->setValidator(CommonValidators::getDomainNameValidator())
                     ->ask();
-            } else {
-                $virtualHost = $virtualHost['host'];
             }
 
             $this->output->writeln("<info>Adding host redirection from '$virtualHost' to service '$serviceName' on port '$virtualPort'</info>");

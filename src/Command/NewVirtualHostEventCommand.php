@@ -2,6 +2,7 @@
 
 namespace TheAentMachine\AentTraefik\Command;
 
+use TheAentMachine\Aenthill\Aenthill;
 use TheAentMachine\Aenthill\CommonEvents;
 use TheAentMachine\Command\AbstractJsonEventCommand;
 use TheAentMachine\Exception\AenthillException;

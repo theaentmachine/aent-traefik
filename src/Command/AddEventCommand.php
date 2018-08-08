@@ -69,6 +69,7 @@ class AddEventCommand extends AbstractJsonEventCommand
 
             $url = $aentHelper->question('Traefik UI domain name')
                 ->setHelpText('This is the domain name you will use to access the Traefik UI.')
+                ->setDefault('traefik'.$baseDomainName)
                 ->compulsory()
                 ->setValidator(CommonValidators::getDomainNameValidator())
                 ->ask();

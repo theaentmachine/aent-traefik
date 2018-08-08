@@ -2,7 +2,6 @@
 
 namespace TheAentMachine\AentTraefik\Command;
 
-use TheAentMachine\Aenthill\Aenthill;
 use TheAentMachine\Aenthill\CommonEvents;
 use TheAentMachine\Aenthill\Manifest;
 use TheAentMachine\Aenthill\CommonMetadata;
@@ -55,7 +54,7 @@ class AddEventCommand extends AbstractJsonEventCommand
             })
             ->ask();
 
-        Aenthill::update(['BASE_DOMAIN_NAME' => $baseDomainName]);
+        Manifest::addMetadata('BASE_DOMAIN_NAME', $baseDomainName);
 
         $answer = $aentHelper->question('Do you want to enable Traefik UI?')
             ->yesNoQuestion()

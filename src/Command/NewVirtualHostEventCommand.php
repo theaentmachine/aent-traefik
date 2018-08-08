@@ -4,6 +4,7 @@ namespace TheAentMachine\AentTraefik\Command;
 
 use TheAentMachine\Aenthill\Aenthill;
 use TheAentMachine\Aenthill\CommonEvents;
+use TheAentMachine\Aenthill\Manifest;
 use TheAentMachine\Command\AbstractJsonEventCommand;
 use TheAentMachine\Exception\AenthillException;
 use TheAentMachine\Question\CommonValidators;
@@ -36,7 +37,7 @@ class NewVirtualHostEventCommand extends AbstractJsonEventCommand
 
         $service->addLabel('traefik.enable', 'true');
 
-        $baseDomainName = Aenthill::metadata('BASE_DOMAIN_NAME');
+        $baseDomainName = Manifest::mustGetMetadata('BASE_DOMAIN_NAME');
 
         foreach ($virtualHosts as $key => $virtualHost) {
             $virtualPort = (string) $virtualHost['port'];

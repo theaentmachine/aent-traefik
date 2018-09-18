@@ -1779,12 +1779,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/gulien/aent-console.git",
-                "reference": "88998cfc23106c9800fc0b18325d31f19e13ea05"
+                "reference": "5fbb1e3aeea901a9312863c8090f4851b7535822"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gulien/aent-console/zipball/88998cfc23106c9800fc0b18325d31f19e13ea05",
-                "reference": "88998cfc23106c9800fc0b18325d31f19e13ea05",
+                "url": "https://api.github.com/repos/gulien/aent-console/zipball/5fbb1e3aeea901a9312863c8090f4851b7535822",
+                "reference": "5fbb1e3aeea901a9312863c8090f4851b7535822",
                 "shasum": ""
             },
             "require": {
@@ -1866,7 +1866,7 @@
             "support": {
                 "source": "https://github.com/gulien/aent-console/tree/master"
             },
-            "time": "2018-09-18T11:53:08+00:00"
+            "time": "2018-09-18T12:15:57+00:00"
         },
         {
             "name": "thecodingmachine/safe",

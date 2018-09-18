@@ -38,7 +38,7 @@ final class NewVirtualHostEvent extends AbstractNewVirtualHostEvent
      */
     protected function process(Service $service): Service
     {
-        $service = $this->getURL($service);
+        $service = $this->addURL($service);
         return $service;
     }
 
@@ -47,7 +47,7 @@ final class NewVirtualHostEvent extends AbstractNewVirtualHostEvent
      * @return Service
      * @throws NewVirtualHostEventException
      */
-    private function getURL(Service $service): Service
+    private function addURL(Service $service): Service
     {
         $serviceName = $service->getServiceName();
         $virtualHosts = $service->getVirtualHosts();

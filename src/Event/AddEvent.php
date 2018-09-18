@@ -46,8 +46,8 @@ final class AddEvent extends AbstractReverseProxyAddEvent
         // Do not expose services by default (otherwise it's insecure!)
         $service->addCommand('--docker.exposedbydefault=false');
         $service->addBindVolume('/var/run/docker.sock', '/var/run/docker.sock');
-        $service = $this->getWebUI($service);
-        $service = $this->getHTTPS($service);
+        $service = $this->addWebUI($service);
+        $service = $this->addHTTPS($service);
         return $service;
     }
 
@@ -63,7 +63,7 @@ final class AddEvent extends AbstractReverseProxyAddEvent
      * @param Service $service
      * @return Service
      */
-    private function getWebUI(Service $service): Service
+    private function addWebUI(Service $service): Service
     {
         if ($this->context->isProduction()) {
             return $service;
@@ -89,7 +89,7 @@ final class AddEvent extends AbstractReverseProxyAddEvent
      * @param Service $service
      * @return Service
      */
-    private function getHTTPS(Service $service): Service
+    private function addHTTPS(Service $service): Service
     {
         if ($this->context->isDevelopment()) {
             return $service;

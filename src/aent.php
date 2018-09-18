@@ -3,13 +3,9 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use TheAentMachine\AentApplication;
-use TheAentMachine\AentTraefik\Command\AddEventCommand;
-use TheAentMachine\AentTraefik\Command\NewVirtualHostEventCommand;
+use \TheAentMachine\Aent\ReverseProxyAent;
+use \TheAentMachine\AentTraefik\Event\AddEvent;
+use \TheAentMachine\AentTraefik\Event\NewVirtualHostEvent;
 
-$application = new AentApplication();
-
-$application->add(new AddEventCommand());
-$application->add(new NewVirtualHostEventCommand());
-
+$application = new ReverseProxyAent(new AddEvent(), new NewVirtualHostEvent());
 $application->run();

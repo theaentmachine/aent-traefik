@@ -2,12 +2,11 @@
 
 namespace TheAentMachine\AentTraefik\Event;
 
-use Safe\Exceptions\StringsException;
 use TheAentMachine\Aent\Context\Context;
 use TheAentMachine\Aent\Event\ReverseProxy\AbstractNewVirtualHostEvent;
+use TheAentMachine\Aent\Payload\ReverseProxy\ReverseProxyNewVirtualHostPayload;
 use TheAentMachine\AentTraefik\Event\Exception\NewVirtualHostEventException;
 use TheAentMachine\Service\Service;
-use function \Safe\sprintf;
 
 final class NewVirtualHostEvent extends AbstractNewVirtualHostEvent
 {
@@ -15,40 +14,14 @@ final class NewVirtualHostEvent extends AbstractNewVirtualHostEvent
     private $context;
 
     /**
-     * @param Service $service
-     * @return void
-     * @throws StringsException
+     * @param ReverseProxyNewVirtualHostPayload $payload
+     * @return Service
+     * @throws NewVirtualHostEventException
      */
-    protected function before(Service $service): void
+    protected function populateService(ReverseProxyNewVirtualHostPayload $payload): Service
     {
         $this->context = Context::fromMetadata();
-        $welcomeMessage = sprintf(
-            "\n👋 Hello! I'm the aent <info>Traefik</info> and I'm going to configure the virtual host of your service <info>%s</info> on your <info>%s</info> environment <info>%s</info>.",
-            $service->getServiceName(),
-            $this->context->getType(),
-            $this->context->getName()
-        );
-        $this->output->writeln($welcomeMessage);
-    }
-
-    /**
-     * @param Service $service
-     * @return Service
-     * @throws NewVirtualHostEventException
-     */
-    protected function process(Service $service): Service
-    {
-        $service = $this->addURL($service);
-        return $service;
-    }
-
-    /**
-     * @param Service $service
-     * @return Service
-     * @throws NewVirtualHostEventException
-     */
-    private function addURL(Service $service): Service
-    {
+        $service = $payload->getService();
         $serviceName = $service->getServiceName();
         $virtualHosts = $service->getVirtualHosts();
         $defaultURL = $serviceName . '.' . $this->context->getBaseVirtualHost();
@@ -61,7 +34,7 @@ final class NewVirtualHostEvent extends AbstractNewVirtualHostEvent
             if (isset($virtualHost['host'])) {
                 $url = $virtualHost['host'];
             } elseif (isset($virtualHost['hostPrefix'])) {
-                $url = $virtualHost['hostPrefix'] . '.' . $this->context->getBaseVirtualHost();
+                $url = $virtualHost['hostPrefix'] . '.' . $payload->getBaseVirtualHost();
             } else {
                 $url = $defaultURL;
                 $this->output->writeln("\nNo virtual host found for <info>$serviceName</info>, using <info>$url</info>.");
@@ -72,21 +45,5 @@ final class NewVirtualHostEvent extends AbstractNewVirtualHostEvent
             $service->addLabel('traefik.s'.$key.'.port', $virtualPort);
         }
         return $service;
-    }
-
-    /**
-     * @param Service $service
-     * @return void
-     * @throws StringsException
-     */
-    protected function after(Service $service): void
-    {
-        $afterMessage = sprintf(
-            "\nI've finished the setup of your service <info>%s</info> on your <info>%s</info> environment <info>%s</info>.",
-            $service->getServiceName(),
-            $this->context->getType(),
-            $this->context->getName()
-        );
-        $this->output->writeln($afterMessage);
     }
 }

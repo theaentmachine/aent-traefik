@@ -7,5 +7,5 @@ use \TheAentMachine\Aent\ReverseProxyAent;
 use \TheAentMachine\AentTraefik\Event\AddEvent;
 use \TheAentMachine\AentTraefik\Event\NewVirtualHostEvent;
 
-$application = new ReverseProxyAent(new AddEvent(), new NewVirtualHostEvent());
+$application = new ReverseProxyAent('Traefik', new AddEvent(), new NewVirtualHostEvent());
 $application->run();

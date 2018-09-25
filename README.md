@@ -12,8 +12,8 @@ No usage, it is used internally by the [aent-docker-compose](https://github.com/
 
 This aent will:
 
-- update a `docker-compose.yml` file with its [Traefik](https://traefik.io/) service
-- update a service by adding necessary labels in a `docker-compose.yml`
+- create a [Traefik](https://traefik.io/) service
+- update a service by adding necessary labels
 
 ## Documentation
 

@@ -2,11 +2,10 @@
 
 namespace TheAentMachine\AentTraefik\Event;
 
-use Safe\Exceptions\StringsException;
 use TheAentMachine\Aent\Context\Context;
 use TheAentMachine\Aent\Event\ReverseProxy\AbstractReverseProxyAddEvent;
+use TheAentMachine\Aent\Payload\ReverseProxy\ReverseProxyAddPayload;
 use TheAentMachine\Service\Service;
-use function \Safe\sprintf;
 
 final class AddEvent extends AbstractReverseProxyAddEvent
 {
@@ -16,25 +15,12 @@ final class AddEvent extends AbstractReverseProxyAddEvent
     private $context;
 
     /**
-     * @return void
-     * @throws StringsException
-     */
-    protected function before(): void
-    {
-        $this->context = Context::fromMetadata();
-        $welcomeMessage = sprintf(
-            "\n👋 Hello! I'm the aent <info>Traefik</info> and I'll help you setting up a <info>Traefik</info> service for your <info>%s</info> environment <info>%s</info>.",
-            $this->context->getType(),
-            $this->context->getName()
-        );
-        $this->output->writeln($welcomeMessage);
-    }
-
-    /**
+     * @param ReverseProxyAddPayload $payload
      * @return Service
      */
-    protected function process(): Service
+    protected function createService(ReverseProxyAddPayload $payload): Service
     {
+        $this->context = Context::fromMetadata();
         $version = $this->prompt->getPromptHelper()->getVersion(self::IMAGE);
         $image = self::IMAGE . ':' . $version;
         $service = new Service();
@@ -46,24 +32,17 @@ final class AddEvent extends AbstractReverseProxyAddEvent
         // Do not expose services by default (otherwise it's insecure!)
         $service->addCommand('--docker.exposedbydefault=false');
         $service->addBindVolume('/var/run/docker.sock', '/var/run/docker.sock');
-        //$service = $this->addWebUI($service);
+        //$service = $this->addWebUI($service, $payload->getBaseVirtualHost());
         $service = $this->addHTTPS($service);
         return $service;
     }
 
     /**
-     * @return void
-     */
-    protected function after(): void
-    {
-        $this->output->writeln("\n<info>Traefik</info> service setup is finished, see you later!");
-    }
-
-    /**
      * @param Service $service
+     * @param string $baseVirtualHost
      * @return Service
      */
-    /*private function addWebUI(Service $service): Service
+    /*private function addWebUI(Service $service, string $baseVirtualHost): Service
     {
         if ($this->context->isProduction()) {
             return $service;
@@ -75,7 +54,7 @@ final class AddEvent extends AbstractReverseProxyAddEvent
             $this->output->writeln("\n👌 Alright, I'm not going to configure the <info>web UI</info>!");
             return $service;
         }
-        $url = 'traefik.' . $this->context->getBaseVirtualHost();
+        $url = 'traefik.' . $baseVirtualHost;
         $service->addCommand('--api');
         $service->addLabel('traefik.enable', 'true');
         $service->addLabel('traefik.backend', 'traefik');
@@ -83,7 +62,7 @@ final class AddEvent extends AbstractReverseProxyAddEvent
         $service->addLabel('traefik.port', '8080');
         $this->output->writeln("\n👌 Alright, your <info>web UI</info> will be accessible at <info>$url</info>!");
         return $service;
-    }:*
+    }*/
 
     /**
      * @param Service $service

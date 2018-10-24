@@ -2,6 +2,9 @@
 
 namespace TheAentMachine\AentTraefik\Event;
 
+use Safe\Exceptions\ArrayException;
+use Safe\Exceptions\FilesystemException;
+use Safe\Exceptions\StringsException;
 use TheAentMachine\Aent\Context\Context;
 use TheAentMachine\Aent\Event\ReverseProxy\AbstractReverseProxyAddEvent;
 use TheAentMachine\Aent\Payload\ReverseProxy\ReverseProxyAddPayload;
@@ -17,6 +20,9 @@ final class AddEvent extends AbstractReverseProxyAddEvent
     /**
      * @param ReverseProxyAddPayload $payload
      * @return Service
+     * @throws FilesystemException
+     * @throws ArrayException
+     * @throws StringsException
      */
     protected function createService(ReverseProxyAddPayload $payload): Service
     {

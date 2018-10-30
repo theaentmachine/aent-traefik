@@ -34,6 +34,7 @@ final class NewVirtualHostEvent extends AbstractNewVirtualHostEvent
             $subdomain = $this->prompt->getPromptHelper()->getSubdomain($serviceName, $port, $baseVirtualHost);
             $url = $subdomain . '.' . $baseVirtualHost;
             $this->output->writeln("\n👌 Your service <info>$serviceName</info> will be accessible at <info>$url</info> (using port <info>$port</info>)!");
+            $service->addLabel('traefik.enable', 'true');
             $service->addLabel('traefik.s'.$index.'.backend', $serviceName);
             $service->addLabel('traefik.s'.$index.'.frontend.rule', 'Host:' . $url);
             $service->addLabel('traefik.s'.$index.'.port', (string)$port);
